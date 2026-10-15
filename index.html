@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Recicla tu e-waste · Los Ángeles</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+<style>
+:root{--mid:#0B2E33;--teal:#028090;--sea:#00A896;--mint:#02C39A;--bg:#F7FAF9;--gray:#5A6B6D;--line:#DCE6E4}
+*{box-sizing:border-box}
+body{margin:0;font-family:Calibri,Carlito,Arial,sans-serif;background:var(--bg);color:var(--mid);line-height:1.45}
+header{background:var(--mid);color:#fff;padding:18px 16px}
+header h1{margin:0;font-size:22px}header p{margin:4px 0 0;color:var(--mint);font-size:14px}
+.banner{background:#FFF4D6;color:#6B4E00;font-size:13px;padding:8px 16px}
+main{max-width:900px;margin:0 auto;padding:14px}
+h2{font-size:18px;margin:22px 0 8px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+.chip{border:1px solid var(--teal);background:#fff;color:var(--teal);border-radius:20px;padding:7px 14px;font-size:14px;cursor:pointer}
+.chip.on{background:var(--teal);color:#fff}
+#map{height:340px;border-radius:12px;border:1px solid var(--line);background:#EAF6F1}
+.err{padding:16px;color:#8A1C1C}
+.card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-top:10px}
+.card h3{margin:0 0 4px;font-size:16px}
+.card p{margin:2px 0;font-size:14px}.muted{color:var(--gray);font-size:12.5px}
+.tag{display:inline-block;font-size:12px;border-radius:10px;padding:2px 9px;color:#fff;margin:0 4px 4px 0}
+.warn{background:#FFF4D6;color:#6B4E00}
+.btn{display:inline-block;margin-top:8px;background:var(--teal);color:#fff;text-decoration:none;border:0;border-radius:8px;padding:9px 14px;font-size:14px;cursor:pointer}
+.btn.off{background:#B9C6C4;pointer-events:none}
+.pin{width:26px;height:26px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4)}
+.box{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px}
+.row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:8px 0}
+.row label{min-width:190px;font-size:14px}.row input[type=range]{flex:1;min-width:140px}
+.out{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-top:10px}
+.kpi{background:var(--mid);color:#fff;border-radius:10px;padding:10px;text-align:center}
+.kpi b{display:block;font-size:24px;color:var(--mint)}.kpi span{font-size:12.5px}
+input[type=number]{width:80px;padding:7px;font-size:16px;border:1px solid var(--line);border-radius:8px}
+footer{max-width:900px;margin:0 auto;padding:10px 14px 30px;font-size:12.5px;color:var(--gray)}
+</style>
+</head>
+<body>
+<header>
+  <h1>¿Dónde reciclo mis residuos electrónicos?</h1>
+  <p>Minimapa de puntos de acopio · Los Ángeles, Biobío</p>
+</header>
+<div class="banner"><b>Versión MVP (datos de demostración).</b> Las ubicaciones del mapa son aproximadas: confirma la dirección y el horario antes de ir.</div>
+
+<main>
+  <section>
+    <h2>1. Encuentra un punto</h2>
+    <div class="chips" id="chips"></div>
+    <div id="map"></div>
+    <div id="list"></div>
+  </section>
+
+  <section>
+    <h2>2. Calcula tu aporte</h2>
+    <div class="box">
+      <div class="row"><label for="dev">¿Cuántos dispositivos vas a llevar?</label>
+        <input type="number" id="dev" min="0" max="50" value="3"></div>
+      <div class="out">
+        <div class="kpi"><b id="c-kg">0</b><span>kg de residuos desviados</span></div>
+        <div class="kpi"><b id="c-co2">0</b><span>kg de CO₂e evitados (aprox.)</span></div>
+      </div>
+      <p class="muted">Supuestos: 0,2 kg por dispositivo (supuesto del grupo) y 3,8 kg de CO₂e por kg reciclado (calculado desde el Global E-waste Monitor 2024; orden de magnitud).</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>3. Simulación de impacto de la solución</h2>
+    <div class="box">
+      <div class="row"><label for="s-v">Visitas al mes: <b id="v-v"></b></label><input type="range" id="s-v" min="0" max="1000" step="10" value="300"></div>
+      <div class="row"><label for="s-c">% que lleva dispositivos: <b id="v-c"></b></label><input type="range" id="s-c" min="0" max="30" step="1" value="10"></div>
+      <div class="row"><label for="s-n">Dispositivos por persona: <b id="v-n"></b></label><input type="range" id="s-n" min="1" max="5" step="1" value="2"></div>
+      <div class="out">
+        <div class="kpi"><b id="i-kg">0</b><span>kg desviados al mes</span></div>
+        <div class="kpi"><b id="i-yr">0</b><span>kg desviados al año</span></div>
+        <div class="kpi"><b id="i-co2">0</b><span>kg CO₂e evitados al mes</span></div>
+      </div>
+      <p class="muted" id="i-ref"></p>
+      <p class="muted">Escenario base del informe: 300 visitas, 10 % y 2 dispositivos de 0,2 kg = 12 kg/mes. Son estimaciones, no mediciones.</p>
+    </div>
+  </section>
+</main>
+
+<footer>
+  Fuentes: Municipalidad de Los Ángeles (programas de recuperación de pilas, celulares y cargadores; revisado el 14-10-2026); El Contraste (2026) sobre la Ruta Circular de Entel; ITU y UNITAR (2024).
+  Mapa © colaboradores de <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>. Proyecto académico, Sustentabilidad y Medio Ambiente, IPVG Sede Los Ángeles.
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<script>
+// ====== DATOS (editar aquí). tipos: celulares | pilas | raee | campana ======
+const FUENTE_MUNI = "Municipalidad de Los Ángeles (sitio web), revisado el 14-10-2026";
+const PUNTOS = [
+  {nombre:"CESFAM Sur", tipos:["celulares","pilas"], dir:"Hernán Díaz / Pasaje Vicente Pérez Rosales", lat:-37.487, lng:-72.342,
+   acepta:"Celulares y cargadores en desuso; pilas domiciliarias.", horario:"Horario del establecimiento (confirmar)", fuente:FUENTE_MUNI},
+  {nombre:"CESFAM Nororiente", tipos:["celulares","pilas"], dir:"Samuel Morse / Bell, Población Endesa", lat:-37.454, lng:-72.338,
+   acepta:"Celulares y cargadores en desuso; pilas domiciliarias.", horario:"Horario del establecimiento (confirmar)", fuente:FUENTE_MUNI},
+  {nombre:"CESFAM Nuevo Horizonte", tipos:["celulares","pilas"], dir:"Las Torcazas / Aguas Calientes, Villa Los Profesores", lat:-37.450, lng:-72.370,
+   acepta:"Celulares y cargadores en desuso; pilas domiciliarias.", horario:"Horario del establecimiento (confirmar)", fuente:FUENTE_MUNI},
+  {nombre:"Municipalidad (edificio consistorial)", tipos:["pilas"], dir:"Caupolicán 399", lat:-37.470, lng:-72.3525,
+   acepta:"Pilas domiciliarias (confirmar ubicación exacta del contenedor).", horario:"Horario municipal (confirmar)", fuente:FUENTE_MUNI},
+  {nombre:"Container municipal de residuos electrónicos", tipos:["raee"], dir:null, lat:null, lng:null,
+   acepta:"Acopio permanente de residuos electrónicos.", horario:"Por confirmar", fuente:FUENTE_MUNI,
+   nota:"La ubicación exacta no figura en el sitio municipal revisado: consultar a la Dirección de Medio Ambiente."},
+  {nombre:"Ruta Circular de Entel (campaña itinerante)", tipos:["campana"], dir:"Plaza de Armas", lat:-37.4697, lng:-72.3536,
+   acepta:"Residuos electrónicos del hogar durante la campaña.", horario:"Última visita: 13 y 14 de abril de 2026, 10:00 a 17:00", fuente:"El Contraste (10-04-2026)",
+   nota:"Campaña finalizada. Próximas fechas por anunciar: seguir las redes de Entel y de la Municipalidad."}
+];
+const TIPOS = {todos:["Todos","#0B2E33"], celulares:["Celulares y cargadores","#028090"], pilas:["Pilas","#00A896"], raee:["Residuos electrónicos","#5B6C70"], campana:["Campañas itinerantes","#E08A00"]};
+const colorDe = p => TIPOS[p.tipos[0]][1];
+
+// ====== MAPA ======
+const mapEl = document.getElementById("map");
+let map = null, capa = null;
+if (typeof L === "undefined") {
+  mapEl.innerHTML = '<p class="err">No se pudo cargar el mapa (¿sin conexión?). Usa la lista de puntos de abajo.</p>';
+} else {
+  map = L.map("map").setView([-37.4697, -72.3536], 13);
+  L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {maxZoom:19, referrerPolicy:"strict-origin-when-cross-origin", attribution:"© colaboradores de OpenStreetMap"}).addTo(map);
+  if (location.protocol === "file:") {
+    const w = document.createElement("div"); w.className = "banner"; w.style.cssText = "border-radius:8px;margin-bottom:8px";
+    w.innerHTML = "<b>Estás abriendo el archivo directamente.</b> OpenStreetMap bloquea sus teselas a las páginas abiertas así (sin dirección de origen). Publica la página (Netlify Drop o GitHub Pages) o ábrela con un servidor local y el mapa se verá bien.";
+    mapEl.parentNode.insertBefore(w, mapEl);
+  }
+  capa = L.layerGroup().addTo(map);
+}
+
+// ====== FILTROS Y LISTA ======
+let filtro = "todos";
+const chips = document.getElementById("chips");
+Object.keys(TIPOS).forEach(k => {
+  const b = document.createElement("button");
+  b.className = "chip" + (k === filtro ? " on" : ""); b.textContent = TIPOS[k][0];
+  b.onclick = () => { filtro = k; [...chips.children].forEach(c => c.classList.toggle("on", c === b)); pintar(); };
+  chips.appendChild(b);
+});
+
+function pintar() {
+  const lista = document.getElementById("list"); lista.innerHTML = "";
+  if (capa) capa.clearLayers();
+  PUNTOS.filter(p => filtro === "todos" || p.tipos.includes(filtro)).forEach(p => {
+    let marcador = null;
+    if (capa && p.lat !== null) {
+      const icon = L.divIcon({className:"", html:`<div class="pin" style="background:${colorDe(p)}"></div>`, iconSize:[26,26], iconAnchor:[13,26]});
+      marcador = L.marker([p.lat, p.lng], {icon}).addTo(capa).bindPopup("<b>" + p.nombre + "</b><br>" + p.dir);
+    }
+    const card = document.createElement("div"); card.className = "card";
+    const tags = p.tipos.map(t => `<span class="tag" style="background:${TIPOS[t][1]}">${TIPOS[t][0]}</span>`).join("");
+    const aprox = (p.lat !== null && p.tipos[0] !== "campana") ? '<span class="tag warn">Ubicación aproximada</span>' : "";
+    const url = p.dir ? "https://www.google.com/maps/dir/?api=1&destination=" + encodeURIComponent(p.dir + ", Los Ángeles, Chile") : "";
+    card.innerHTML = `${tags}${aprox}<h3>${p.nombre}</h3>
+      <p><b>Dirección:</b> ${p.dir || "Por confirmar"}</p>
+      <p><b>Qué reciben:</b> ${p.acepta}</p>
+      <p><b>Horario:</b> ${p.horario}</p>
+      ${p.nota ? `<p class="muted">${p.nota}</p>` : ""}
+      <p class="muted">Fuente: ${p.fuente}</p>
+      <a class="btn ${url ? "" : "off"}" ${url ? `href="${url}" target="_blank" rel="noopener"` : ""}>Cómo llegar</a>`;
+    card.onclick = e => { if (marcador && e.target.tagName !== "A") { map.setView([p.lat, p.lng], 15); marcador.openPopup(); mapEl.scrollIntoView({behavior:"smooth", block:"center"}); } };
+    lista.appendChild(card);
+  });
+}
+pintar();
+
+// ====== CALCULADORA DE APORTE ======
+const PESO = 0.2, FACTOR = 3.8;
+const fmt = (n, d = 1) => n.toLocaleString("es-CL", {maximumFractionDigits:d, minimumFractionDigits:0});
+const dev = document.getElementById("dev");
+function calc() {
+  const n = Math.max(0, Number(dev.value) || 0);
+  document.getElementById("c-kg").textContent = fmt(n * PESO, 2);
+  document.getElementById("c-co2").textContent = fmt(n * PESO * FACTOR, 1);
+}
+dev.oninput = calc; calc();
+
+// ====== SIMULACIÓN DE IMPACTO ======
+const sv = document.getElementById("s-v"), sc = document.getElementById("s-c"), sn = document.getElementById("s-n");
+function sim() {
+  const V = +sv.value, c = +sc.value / 100, n = +sn.value;
+  const kg = V * c * n * PESO;
+  document.getElementById("v-v").textContent = fmt(V, 0);
+  document.getElementById("v-c").textContent = sc.value + " %";
+  document.getElementById("v-n").textContent = n;
+  document.getElementById("i-kg").textContent = fmt(kg, 1);
+  document.getElementById("i-yr").textContent = fmt(kg * 12, 0);
+  document.getElementById("i-co2").textContent = fmt(kg * FACTOR, 1);
+  document.getElementById("i-ref").textContent = "Referencia: la Ruta Circular reunió 61.000 kg en 188 comunas en 2025, unos 324 kg por comuna. Tu escenario aporta " + fmt(kg * 12, 0) + " kg al año de forma continua.";
+}
+[sv, sc, sn].forEach(el => el.oninput = sim); sim();
+</script>
+</body>
+</html>
