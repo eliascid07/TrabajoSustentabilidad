@@ -34,6 +34,10 @@ h2{font-size:18px;margin:22px 0 8px}
 .kpi{background:var(--mid);color:#fff;border-radius:10px;padding:10px;text-align:center}
 .kpi b{display:block;font-size:24px;color:var(--mint)}.kpi span{font-size:12.5px}
 input[type=number]{width:80px;padding:7px;font-size:16px;border:1px solid var(--line);border-radius:8px}
+select{padding:8px;font-size:15px;border:1px solid var(--line);border-radius:8px;max-width:100%}
+.row label.r{min-width:0}
+details.box summary{cursor:pointer;font-size:15px}
+ol.pasos{padding-left:20px;margin:8px 0}
 footer{max-width:900px;margin:0 auto;padding:10px 14px 30px;font-size:12.5px;color:var(--gray)}
 </style>
 </head>
@@ -53,20 +57,48 @@ footer{max-width:900px;margin:0 auto;padding:10px 14px 30px;font-size:12.5px;col
   </section>
 
   <section>
-    <h2>2. Calcula tu aporte</h2>
+    <h2>2. ¿Qué hago con esto?</h2>
     <div class="box">
-      <div class="row"><label for="dev">¿Cuántos dispositivos vas a llevar?</label>
+      <div class="row"><label for="a-tipo">¿Qué aparato es?</label><select id="a-tipo"></select></div>
+      <div class="row"><label>¿Todavía funciona?</label>
+        <label class="r"><input type="radio" name="a-fun" value="si" checked> Sí</label>
+        <label class="r"><input type="radio" name="a-fun" value="no"> No</label></div>
+      <div id="a-res" class="card"></div>
+    </div>
+  </section>
+
+  <section id="borrado">
+    <h2>3. Antes de entregarlo: borrado seguro</h2>
+    <details class="box" id="det-borrado" open>
+      <summary><b>Pasos generales para celulares, tablets y computadores</b></summary>
+      <ol class="pasos">
+        <li>Respalda tus fotos, contactos y archivos (en la nube o en otro equipo).</li>
+        <li>Cierra sesión de tus cuentas (Google, Apple, Microsoft) y desactiva la función de bloqueo o de buscar el dispositivo.</li>
+        <li>Quita la tarjeta SIM y la tarjeta de memoria.</li>
+        <li>Restablece el equipo a estado de fábrica desde los ajustes (el nombre de la opción cambia según el sistema).</li>
+        <li>Comprueba que el equipo vuelve a la pantalla de bienvenida, sin tus datos.</li>
+      </ol>
+      <p class="muted">Versión en construcción: los pasos exactos cambian según la marca y el sistema. Falta enlazar la documentación oficial de Android, Apple y Windows.</p>
+    </details>
+  </section>
+
+  <section>
+    <h2>4. Calcula tu aporte</h2>
+    <div class="box">
+      <div class="row"><label for="c-tipo">Tipo de aparato</label><select id="c-tipo"></select></div>
+      <div class="row"><label for="dev">¿Cuántos vas a llevar?</label>
         <input type="number" id="dev" min="0" max="50" value="3"></div>
       <div class="out">
         <div class="kpi"><b id="c-kg">0</b><span>kg de residuos desviados</span></div>
         <div class="kpi"><b id="c-co2">0</b><span>kg de CO₂e evitados (aprox.)</span></div>
       </div>
-      <p class="muted">Supuestos: 0,2 kg por dispositivo (supuesto del grupo) y 3,8 kg de CO₂e por kg reciclado (calculado desde el Global E-waste Monitor 2024; orden de magnitud).</p>
+      <p class="muted" id="c-fuente"></p>
+      <p class="muted">Factor: 3,8 kg de CO₂e por kg reciclado, calculado desde el Global E-waste Monitor 2024 (52 millones de t de CO₂e evitadas / 13,8 millones de t recicladas; promedio global, orden de magnitud).</p>
     </div>
   </section>
 
   <section>
-    <h2>3. Simulación de impacto de la solución</h2>
+    <h2>5. Simulación de impacto de la solución</h2>
     <div class="box">
       <div class="row"><label for="s-v">Visitas al mes: <b id="v-v"></b></label><input type="range" id="s-v" min="0" max="1000" step="10" value="300"></div>
       <div class="row"><label for="s-c">% que lleva dispositivos: <b id="v-c"></b></label><input type="range" id="s-c" min="0" max="30" step="1" value="10"></div>
@@ -89,6 +121,12 @@ footer{max-width:900px;margin:0 auto;padding:10px 14px 30px;font-size:12.5px;col
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
 <script>
+// ====== ANALÍTICA SIN COOKIES (GoatCounter). Pega aquí tu código, por ejemplo "mi-proyecto" ======
+const GOATCOUNTER = "";
+if (GOATCOUNTER) { const g = document.createElement("script"); g.async = true; g.src = "https://gc.zgo.at/count.js";
+  g.dataset.goatcounter = "https://" + GOATCOUNTER + ".goatcounter.com/count"; document.head.appendChild(g); }
+function contar(path) { try { if (window.goatcounter && window.goatcounter.count) window.goatcounter.count({path: path, title: path, event: true}); } catch (e) {} }
+
 // ====== DATOS (editar aquí). tipos: celulares | pilas | raee | campana ======
 const FUENTE_MUNI = "Municipalidad de Los Ángeles (sitio web), revisado el 14-10-2026";
 const PUNTOS = [
@@ -132,9 +170,11 @@ const chips = document.getElementById("chips");
 Object.keys(TIPOS).forEach(k => {
   const b = document.createElement("button");
   b.className = "chip" + (k === filtro ? " on" : ""); b.textContent = TIPOS[k][0];
-  b.onclick = () => { filtro = k; [...chips.children].forEach(c => c.classList.toggle("on", c === b)); pintar(); };
+  b.dataset.k = k; b.onclick = () => elegirFiltro(k);
   chips.appendChild(b);
 });
+
+function elegirFiltro(k) { filtro = k; [...chips.children].forEach(c => c.classList.toggle("on", c.dataset.k === k)); pintar(); }
 
 function pintar() {
   const lista = document.getElementById("list"); lista.innerHTML = "";
@@ -157,21 +197,56 @@ function pintar() {
       <p class="muted">Fuente: ${p.fuente}</p>
       <a class="btn ${url ? "" : "off"}" ${url ? `href="${url}" target="_blank" rel="noopener"` : ""}>Cómo llegar</a>`;
     card.onclick = e => { if (marcador && e.target.tagName !== "A") { map.setView([p.lat, p.lng], 15); marcador.openPopup(); mapEl.scrollIntoView({behavior:"smooth", block:"center"}); } };
+    const aBtn = card.querySelector("a.btn"); if (aBtn && url) aBtn.addEventListener("click", () => contar("como-llegar-" + p.nombre));
     lista.appendChild(card);
   });
 }
 pintar();
 
-// ====== CALCULADORA DE APORTE ======
-const PESO = 0.2, FACTOR = 3.8;
+// ====== CATEGORÍAS (pesos provisorios: reemplazar con la tabla medida con balanza) ======
+const FACTOR = 3.8, PESO = 0.2;
+const CATEGORIAS = [
+  {id:"celular", nombre:"Celular", peso:0.2, tipo:"celulares", datos:true},
+  {id:"cargador", nombre:"Cargador o cables", peso:0.1, tipo:"celulares", datos:false},
+  {id:"notebook", nombre:"Notebook", peso:2.0, tipo:"raee", datos:true},
+  {id:"tablet", nombre:"Tablet", peso:0.5, tipo:"raee", datos:true},
+  {id:"monitor", nombre:"Monitor", peso:4.5, tipo:"raee", datos:false},
+  {id:"impresora", nombre:"Impresora", peso:6.0, tipo:"raee", datos:false},
+  {id:"electro", nombre:"Pequeño electrodoméstico", peso:1.0, tipo:"raee", datos:false},
+  {id:"pilas", nombre:"Pilas", peso:0.03, tipo:"pilas", datos:false}
+];
+const PESO_FUENTE = "Pesos por categoría provisorios (por medir con balanza): se reemplazarán por la tabla medida.";
 const fmt = (n, d = 1) => n.toLocaleString("es-CL", {maximumFractionDigits:d, minimumFractionDigits:0});
+const opts = CATEGORIAS.map(c => `<option value="${c.id}">${c.nombre}</option>`).join("");
+const selA = document.getElementById("a-tipo"), selC = document.getElementById("c-tipo");
+selA.innerHTML = opts; selC.innerHTML = opts;
+
+// ====== ASISTENTE: ¿QUÉ HAGO CON ESTO? (reparar > donar > reciclar) ======
+function asistente() {
+  const c = CATEGORIAS.find(x => x.id === selA.value);
+  const f = document.querySelector("input[name=a-fun]:checked").value;
+  let titulo, texto;
+  if (c.id === "pilas") { titulo = "Reciclar (nunca a la basura común)"; texto = "Las pilas contaminan y pueden ser peligrosas si se dañan. Llévalas a un punto de recepción de pilas."; }
+  else if (f === "si") { titulo = "1.º Donar o regalar · 2.º Reciclar"; texto = "Si todavía funciona, darle otra vida evita más impacto que reciclarlo. Si nadie lo quiere, llévalo a reciclar."; }
+  else { titulo = "1.º Reparar · 2.º Reciclar"; texto = "Si tiene arreglo y conviene, repáralo. Si no, llévalo a reciclar."; }
+  const caja = document.getElementById("a-res");
+  caja.innerHTML = `<h3>${titulo}</h3><p>${texto}</p>` +
+    (c.datos ? `<p><b>Antes de entregarlo:</b> borra tus datos. <a href="#borrado">Ver los pasos de borrado seguro</a></p>` : "") +
+    `<p class="muted">Directorio de servicios de reparación y de organizaciones que reciben donaciones: próximamente.</p>
+     <button class="btn" id="a-ver">Ver puntos que lo reciben</button>`;
+  document.getElementById("a-ver").onclick = () => { contar("asistente-" + c.id + "-" + f); elegirFiltro(c.tipo); mapEl.scrollIntoView({behavior:"smooth", block:"center"}); };
+}
+selA.onchange = asistente; document.querySelectorAll("input[name=a-fun]").forEach(r => r.onchange = asistente); asistente();
+
+// ====== CALCULADORA DE APORTE (por categoría) ======
 const dev = document.getElementById("dev");
 function calc() {
-  const n = Math.max(0, Number(dev.value) || 0);
-  document.getElementById("c-kg").textContent = fmt(n * PESO, 2);
-  document.getElementById("c-co2").textContent = fmt(n * PESO * FACTOR, 1);
+  const c = CATEGORIAS.find(x => x.id === selC.value), n = Math.max(0, Number(dev.value) || 0);
+  document.getElementById("c-kg").textContent = fmt(n * c.peso, 2);
+  document.getElementById("c-co2").textContent = fmt(n * c.peso * FACTOR, 1);
+  document.getElementById("c-fuente").textContent = PESO_FUENTE + " Peso usado: " + fmt(c.peso, 2) + " kg por unidad.";
 }
-dev.oninput = calc; calc();
+selC.onchange = calc; dev.oninput = calc; calc();
 
 // ====== SIMULACIÓN DE IMPACTO ======
 const sv = document.getElementById("s-v"), sc = document.getElementById("s-c"), sn = document.getElementById("s-n");
