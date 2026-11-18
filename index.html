@@ -46,7 +46,7 @@ footer{max-width:900px;margin:0 auto;padding:10px 14px 30px;font-size:12.5px;col
   <h1>¿Dónde reciclo mis residuos electrónicos?</h1>
   <p>Minimapa de puntos de acopio · Los Ángeles, Biobío</p>
 </header>
-<div class="banner"><b>Versión MVP (datos de demostración).</b> Las ubicaciones del mapa son aproximadas: confirma la dirección y el horario antes de ir.</div>
+<div class="banner"><b>Versión MVP.</b> Los puntos vienen de fuentes oficiales y aún no están confirmados en terreno (se muestran en gris). Las ubicaciones son aproximadas y los horarios no están publicados: confirma con el establecimiento antes de ir.</div>
 
 <main>
   <section>
@@ -69,16 +69,37 @@ footer{max-width:900px;margin:0 auto;padding:10px 14px 30px;font-size:12.5px;col
 
   <section id="borrado">
     <h2>3. Antes de entregarlo: borrado seguro</h2>
+    <p class="muted">Muchas personas guardan sus equipos por miedo a lo que pasa con sus datos. Elige tu sistema: los pasos vienen de la documentación oficial de cada fabricante (consultada el 18-11-2026). Antes de empezar, quita también la tarjeta SIM y la de memoria.</p>
     <details class="box" id="det-borrado" open>
-      <summary><b>Pasos generales para celulares, tablets y computadores</b></summary>
+      <summary><b>Celular o tablet Android</b></summary>
       <ol class="pasos">
-        <li>Respalda tus fotos, contactos y archivos (en la nube o en otro equipo).</li>
-        <li>Cierra sesión de tus cuentas (Google, Apple, Microsoft) y desactiva la función de bloqueo o de buscar el dispositivo.</li>
-        <li>Quita la tarjeta SIM y la tarjeta de memoria.</li>
-        <li>Restablece el equipo a estado de fábrica desde los ajustes (el nombre de la opción cambia según el sistema).</li>
-        <li>Comprueba que el equipo vuelve a la pantalla de bienvenida, sin tus datos.</li>
+        <li>Haz una copia de seguridad en tu cuenta de Google.</li>
+        <li>Comprueba en Ajustes &gt; Cuentas que conoces tu cuenta de Google y su contraseña, y ten a mano tu PIN, patrón o contraseña de pantalla.</li>
+        <li>Carga la batería al menos al 70 % y conéctalo a Wi-Fi o a una red móvil.</li>
+        <li>Restablece los datos de fábrica desde Ajustes. Esto borra todos los datos del teléfono y puede tardar hasta una hora.</li>
       </ol>
-      <p class="muted">Versión en construcción: los pasos exactos cambian según la marca y el sistema. Falta enlazar la documentación oficial de Android, Apple y Windows.</p>
+      <p class="muted">Fuente: <a href="https://support.google.com/android/answer/6088915?hl=es" target="_blank" rel="noopener">Ayuda de Android: Restablecer los datos de fábrica de un dispositivo Android</a>. Algunos pasos varían según la marca y la versión.</p>
+    </details>
+    <details class="box">
+      <summary><b>iPhone o iPad</b></summary>
+      <ol class="pasos">
+        <li>Haz una copia de seguridad del equipo.</li>
+        <li>Desvincula el Apple Watch, si lo tienes enlazado.</li>
+        <li>Cierra sesión en iCloud y en App Store.</li>
+        <li>En Ajustes &gt; General &gt; Transferir o restablecer, elige borrar el contenido y la configuración, e ingresa el código si te lo piden.</li>
+        <li>Quita el equipo de tu lista de dispositivos de confianza.</li>
+      </ol>
+      <p class="muted">Fuente: <a href="https://support.apple.com/es-lamr/HT201351" target="_blank" rel="noopener">Soporte de Apple: Qué hacer antes de vender, regalar o canjear un iPhone o iPad</a>.</p>
+    </details>
+    <details class="box">
+      <summary><b>Computador con Windows 11</b></summary>
+      <ol class="pasos">
+        <li>Haz una copia de seguridad de tus archivos importantes. Si el equipo está cifrado, ten a mano la clave de recuperación de BitLocker.</li>
+        <li>Abre Configuración &gt; Recuperación del sistema &gt; Restablecer PC y elige <b>Quitar todo</b>.</li>
+        <li>En las opciones, activa <b>Limpiar datos</b> para dificultar que otras personas recuperen lo borrado.</li>
+        <li>Sigue las instrucciones. La pantalla puede quedar en negro más de 15 minutos: no reinicies el equipo.</li>
+      </ol>
+      <p class="muted">Microsoft aclara que "Limpiar datos" es una función para consumidores y no cumple estándares gubernamentales de borrado. Fuente: <a href="https://support.microsoft.com/es-es/windows/restablecer-el-pc-0ef73740-b927-549b-b7c9-e6f2b48d275e" target="_blank" rel="noopener">Soporte de Microsoft: Restablecer el equipo</a>.</p>
     </details>
   </section>
 
@@ -93,7 +114,11 @@ footer{max-width:900px;margin:0 auto;padding:10px 14px 30px;font-size:12.5px;col
         <div class="kpi"><b id="c-co2">0</b><span>kg de CO₂e evitados (aprox.)</span></div>
       </div>
       <p class="muted" id="c-fuente"></p>
-      <p class="muted">Factor: 3,8 kg de CO₂e por kg reciclado, calculado desde el Global E-waste Monitor 2024 (52 millones de t de CO₂e evitadas / 13,8 millones de t recicladas; promedio global, orden de magnitud).</p>
+      <details>
+        <summary class="muted"><b>¿De dónde sale el 3,8 kg de CO₂e por kg?</b></summary>
+        <p class="muted">Del informe Global E-waste Monitor 2024 (ITU y UNITAR): 52 millones de toneladas de CO₂e evitadas gracias a 13,8 millones de toneladas recicladas formalmente. 52 ÷ 13,8 = 3,77, que redondeamos a 3,8 kg de CO₂e por cada kg reciclado.</p>
+        <p class="muted"><b>Límites:</b> es un promedio mundial de todos los residuos electrónicos, no un valor por aparato, así que sirve como orden de magnitud y no como medición. Si se publica un factor por categoría, lo usaremos.</p>
+      </details>
     </div>
   </section>
 
@@ -109,13 +134,13 @@ footer{max-width:900px;margin:0 auto;padding:10px 14px 30px;font-size:12.5px;col
         <div class="kpi"><b id="i-co2">0</b><span>kg CO₂e evitados al mes</span></div>
       </div>
       <p class="muted" id="i-ref"></p>
-      <p class="muted">Escenario base del informe: 300 visitas, 10 % y 2 dispositivos de 0,2 kg = 12 kg/mes. Son estimaciones, no mediciones.</p>
+      <p class="muted">Escenario base del informe: 300 visitas, 10 % y 2 dispositivos de 0,2 kg (un celular medido pesó 0,196 kg) = 12 kg/mes. Es una estimación, no una medición.</p>
     </div>
   </section>
 </main>
 
 <footer>
-  Fuentes: Municipalidad de Los Ángeles (programas de recuperación de pilas, celulares y cargadores; revisado el 14-10-2026); El Contraste (2026) sobre la Ruta Circular de Entel; ITU y UNITAR (2024).
+  Fuentes: Municipalidad de Los Ángeles (sitios «Puntos de recolección de reciclables» y «Los Ángeles verde y sustentable», consultados el 18-11-2026; no publican horarios ni responsables de cada punto); pesos medidos por el grupo con balanza (18-11-2026); El Contraste (2026) sobre la Ruta Circular de Entel; ITU y UNITAR (2024).
   Mapa © colaboradores de <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>. Proyecto académico, Sustentabilidad y Medio Ambiente, IPVG Sede Los Ángeles.
 </footer>
 
@@ -128,25 +153,26 @@ if (GOATCOUNTER) { const g = document.createElement("script"); g.async = true; g
 function contar(path) { try { if (window.goatcounter && window.goatcounter.count) window.goatcounter.count({path: path, title: path, event: true}); } catch (e) {} }
 
 // ====== DATOS (editar aquí). tipos: celulares | pilas | raee | campana ======
-const FUENTE_MUNI = "Municipalidad de Los Ángeles (sitio web), revisado el 14-10-2026";
+const FUENTE_MUNI = "Municipalidad de Los Ángeles (sitio web), consultado el 18-11-2026. Sin confirmar en terreno";
+const HORARIO_ND = "No publicado por la municipalidad: confirma con el establecimiento antes de ir";
 const PUNTOS = [
   {nombre:"CESFAM Sur", tipos:["celulares","pilas"], dir:"Hernán Díaz / Pasaje Vicente Pérez Rosales", lat:-37.487, lng:-72.342,
-   acepta:"Celulares y cargadores en desuso; pilas domiciliarias.", horario:"Horario del establecimiento (confirmar)", fuente:FUENTE_MUNI},
+   acepta:"Celulares y cargadores en desuso; pilas domiciliarias.", horario:HORARIO_ND, fuente:FUENTE_MUNI},
   {nombre:"CESFAM Nororiente", tipos:["celulares","pilas"], dir:"Samuel Morse / Bell, Población Endesa", lat:-37.454, lng:-72.338,
-   acepta:"Celulares y cargadores en desuso; pilas domiciliarias.", horario:"Horario del establecimiento (confirmar)", fuente:FUENTE_MUNI},
+   acepta:"Celulares y cargadores en desuso; pilas domiciliarias.", horario:HORARIO_ND, fuente:FUENTE_MUNI},
   {nombre:"CESFAM Nuevo Horizonte", tipos:["celulares","pilas"], dir:"Las Torcazas / Aguas Calientes, Villa Los Profesores", lat:-37.450, lng:-72.370,
-   acepta:"Celulares y cargadores en desuso; pilas domiciliarias.", horario:"Horario del establecimiento (confirmar)", fuente:FUENTE_MUNI},
+   acepta:"Celulares y cargadores en desuso; pilas domiciliarias.", horario:HORARIO_ND, fuente:FUENTE_MUNI},
   {nombre:"Municipalidad (edificio consistorial)", tipos:["pilas"], dir:"Caupolicán 399", lat:-37.470, lng:-72.3525,
-   acepta:"Pilas domiciliarias (confirmar ubicación exacta del contenedor).", horario:"Horario municipal (confirmar)", fuente:FUENTE_MUNI},
+   acepta:"Pilas domiciliarias (confirmar ubicación exacta del contenedor).", horario:HORARIO_ND, fuente:FUENTE_MUNI},
   {nombre:"Container municipal de residuos electrónicos", tipos:["raee"], dir:null, lat:null, lng:null,
-   acepta:"Acopio permanente de residuos electrónicos.", horario:"Por confirmar", fuente:FUENTE_MUNI,
+   acepta:"Acopio permanente de residuos electrónicos.", horario:HORARIO_ND, fuente:FUENTE_MUNI,
    nota:"La ubicación exacta no figura en el sitio municipal revisado: consultar a la Dirección de Medio Ambiente."},
   {nombre:"Ruta Circular de Entel (campaña itinerante)", tipos:["campana"], dir:"Plaza de Armas", lat:-37.4697, lng:-72.3536,
    acepta:"Residuos electrónicos del hogar durante la campaña.", horario:"Última visita: 13 y 14 de abril de 2026, 10:00 a 17:00", fuente:"El Contraste (10-04-2026)",
    nota:"Campaña finalizada. Próximas fechas por anunciar: seguir las redes de Entel y de la Municipalidad."}
 ];
 const TIPOS = {todos:["Todos","#0B2E33"], celulares:["Celulares y cargadores","#028090"], pilas:["Pilas","#00A896"], raee:["Residuos electrónicos","#5B6C70"], campana:["Campañas itinerantes","#E08A00"]};
-const colorDe = p => TIPOS[p.tipos[0]][1];
+const colorDe = p => (p.tipos[0] === "campana" ? TIPOS.campana[1] : "#9AA8AA"); // gris = sin confirmar en terreno (regla del plan: gris si no se verificó en 90 días)
 
 // ====== MAPA ======
 const mapEl = document.getElementById("map");
@@ -187,7 +213,7 @@ function pintar() {
     }
     const card = document.createElement("div"); card.className = "card";
     const tags = p.tipos.map(t => `<span class="tag" style="background:${TIPOS[t][1]}">${TIPOS[t][0]}</span>`).join("");
-    const aprox = (p.lat !== null && p.tipos[0] !== "campana") ? '<span class="tag warn">Ubicación aproximada</span>' : "";
+    const aprox = (p.tipos[0] !== "campana" ? '<span class="tag" style="background:#9AA8AA">Sin confirmar en terreno</span>' : "") + ((p.lat !== null && p.tipos[0] !== "campana") ? '<span class="tag warn">Ubicación aproximada</span>' : "");
     const url = p.dir ? "https://www.google.com/maps/dir/?api=1&destination=" + encodeURIComponent(p.dir + ", Los Ángeles, Chile") : "";
     card.innerHTML = `${tags}${aprox}<h3>${p.nombre}</h3>
       <p><b>Dirección:</b> ${p.dir || "Por confirmar"}</p>
@@ -203,19 +229,19 @@ function pintar() {
 }
 pintar();
 
-// ====== CATEGORÍAS (pesos provisorios: reemplazar con la tabla medida con balanza) ======
+// ====== CATEGORÍAS: pesos medidos con balanza el 18-11-2026 (n = aparatos pesados) ======
 const FACTOR = 3.8, PESO = 0.2;
 const CATEGORIAS = [
-  {id:"celular", nombre:"Celular", peso:0.2, tipo:"celulares", datos:true},
-  {id:"cargador", nombre:"Cargador o cables", peso:0.1, tipo:"celulares", datos:false},
-  {id:"notebook", nombre:"Notebook", peso:2.0, tipo:"raee", datos:true},
-  {id:"tablet", nombre:"Tablet", peso:0.5, tipo:"raee", datos:true},
-  {id:"monitor", nombre:"Monitor", peso:4.5, tipo:"raee", datos:false},
-  {id:"impresora", nombre:"Impresora", peso:6.0, tipo:"raee", datos:false},
-  {id:"electro", nombre:"Pequeño electrodoméstico", peso:1.0, tipo:"raee", datos:false},
-  {id:"pilas", nombre:"Pilas", peso:0.03, tipo:"pilas", datos:false}
+  {id:"celular", nombre:"Celular", peso:0.196, tipo:"celulares", datos:true, med:"n = 2: 192 g y 200 g"},
+  {id:"cargador", nombre:"Cargador con cable", peso:0.042, tipo:"celulares", datos:false, med:"n = 2: 24 g y 60 g, con cable"},
+  {id:"notebook", nombre:"Notebook", peso:1.75, tipo:"raee", datos:true, med:"n = 1: 1,75 kg"},
+  {id:"tablet", nombre:"Tablet", peso:0.5, tipo:"raee", datos:true, med:null},
+  {id:"monitor", nombre:"Monitor", peso:3.8, tipo:"raee", datos:false, med:"n = 1: 3,80 kg, con base"},
+  {id:"impresora", nombre:"Impresora", peso:6.55, tipo:"raee", datos:false, med:"n = 1: 6,55 kg"},
+  {id:"electro", nombre:"Pequeño electrodoméstico", peso:0.42, tipo:"raee", datos:false, med:"n = 1: secador, 420 g"},
+  {id:"parlante", nombre:"Parlante o audífonos", peso:0.382, tipo:"raee", datos:false, med:"n = 1: parlante, 382 g"},
+  {id:"pilas", nombre:"Pilas (por unidad)", peso:0.025, tipo:"pilas", datos:false, med:"4 pilas AA juntas: 100 g"}
 ];
-const PESO_FUENTE = "Pesos por categoría provisorios (por medir con balanza): se reemplazarán por la tabla medida.";
 const fmt = (n, d = 1) => n.toLocaleString("es-CL", {maximumFractionDigits:d, minimumFractionDigits:0});
 const opts = CATEGORIAS.map(c => `<option value="${c.id}">${c.nombre}</option>`).join("");
 const selA = document.getElementById("a-tipo"), selC = document.getElementById("c-tipo");
@@ -244,7 +270,7 @@ function calc() {
   const c = CATEGORIAS.find(x => x.id === selC.value), n = Math.max(0, Number(dev.value) || 0);
   document.getElementById("c-kg").textContent = fmt(n * c.peso, 2);
   document.getElementById("c-co2").textContent = fmt(n * c.peso * FACTOR, 1);
-  document.getElementById("c-fuente").textContent = PESO_FUENTE + " Peso usado: " + fmt(c.peso, 2) + " kg por unidad.";
+  document.getElementById("c-fuente").textContent = (c.med ? "Peso medido con balanza el 18-11-2026 (" + c.med + "; con pocas unidades, puede variar según el modelo). " : "Valor provisorio: todavía no lo medimos. ") + "Peso usado: " + fmt(c.peso, 3) + " kg por unidad.";
 }
 selC.onchange = calc; dev.oninput = calc; calc();
 
