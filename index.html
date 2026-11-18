@@ -156,18 +156,18 @@ function contar(path) { try { if (window.goatcounter && window.goatcounter.count
 const FUENTE_MUNI = "Municipalidad de Los Ángeles (sitio web), consultado el 18-11-2026. Sin confirmar en terreno";
 const HORARIO_ND = "No publicado por la municipalidad: confirma con el establecimiento antes de ir";
 const PUNTOS = [
-  {nombre:"CESFAM Sur", tipos:["celulares","pilas"], dir:"Hernán Díaz / Pasaje Vicente Pérez Rosales", lat:-37.487, lng:-72.342,
+  {comuna:"Los Ángeles", nombre:"CESFAM Sur", tipos:["celulares","pilas"], dir:"Hernán Díaz / Pasaje Vicente Pérez Rosales", lat:-37.487, lng:-72.342,
    acepta:"Celulares y cargadores en desuso; pilas domiciliarias.", horario:HORARIO_ND, fuente:FUENTE_MUNI},
-  {nombre:"CESFAM Nororiente", tipos:["celulares","pilas"], dir:"Samuel Morse / Bell, Población Endesa", lat:-37.454, lng:-72.338,
+  {comuna:"Los Ángeles", nombre:"CESFAM Nororiente", tipos:["celulares","pilas"], dir:"Samuel Morse / Bell, Población Endesa", lat:-37.454, lng:-72.338,
    acepta:"Celulares y cargadores en desuso; pilas domiciliarias.", horario:HORARIO_ND, fuente:FUENTE_MUNI},
-  {nombre:"CESFAM Nuevo Horizonte", tipos:["celulares","pilas"], dir:"Las Torcazas / Aguas Calientes, Villa Los Profesores", lat:-37.450, lng:-72.370,
+  {comuna:"Los Ángeles", nombre:"CESFAM Nuevo Horizonte", tipos:["celulares","pilas"], dir:"Las Torcazas / Aguas Calientes, Villa Los Profesores", lat:-37.450, lng:-72.370,
    acepta:"Celulares y cargadores en desuso; pilas domiciliarias.", horario:HORARIO_ND, fuente:FUENTE_MUNI},
-  {nombre:"Municipalidad (edificio consistorial)", tipos:["pilas"], dir:"Caupolicán 399", lat:-37.470, lng:-72.3525,
+  {comuna:"Los Ángeles", nombre:"Municipalidad (edificio consistorial)", tipos:["pilas"], dir:"Caupolicán 399", lat:-37.470, lng:-72.3525,
    acepta:"Pilas domiciliarias (confirmar ubicación exacta del contenedor).", horario:HORARIO_ND, fuente:FUENTE_MUNI},
-  {nombre:"Container municipal de residuos electrónicos", tipos:["raee"], dir:null, lat:null, lng:null,
+  {comuna:"Los Ángeles", nombre:"Container municipal de residuos electrónicos", tipos:["raee"], dir:null, lat:null, lng:null,
    acepta:"Acopio permanente de residuos electrónicos.", horario:HORARIO_ND, fuente:FUENTE_MUNI,
    nota:"La ubicación exacta no figura en el sitio municipal revisado: consultar a la Dirección de Medio Ambiente."},
-  {nombre:"Ruta Circular de Entel (campaña itinerante)", tipos:["campana"], dir:"Plaza de Armas", lat:-37.4697, lng:-72.3536,
+  {comuna:"Los Ángeles", nombre:"Ruta Circular de Entel (campaña itinerante)", tipos:["campana"], dir:"Plaza de Armas", lat:-37.4697, lng:-72.3536,
    acepta:"Residuos electrónicos del hogar durante la campaña.", horario:"Última visita: 13 y 14 de abril de 2026, 10:00 a 17:00", fuente:"El Contraste (10-04-2026)",
    nota:"Campaña finalizada. Próximas fechas por anunciar: seguir las redes de Entel y de la Municipalidad."}
 ];
@@ -215,8 +215,9 @@ function pintar() {
     const card = document.createElement("div"); card.className = "card";
     const tags = p.tipos.map(t => `<span class="tag" style="background:${TIPOS[t][1]}">${TIPOS[t][0]}</span>`).join("");
     const aprox = (p.osm ? '<span class="tag" style="background:#6B7F83">OpenStreetMap</span>' : "") + (p.tipos[0] !== "campana" ? '<span class="tag" style="background:#9AA8AA">Sin confirmar en terreno</span>' : "") + ((p.lat !== null && p.tipos[0] !== "campana" && !p.osm) ? '<span class="tag warn">Ubicación aproximada</span>' : "");
-    const url = p.osm ? "https://www.google.com/maps/dir/?api=1&destination=" + p.lat + "," + p.lng : (p.dir ? "https://www.google.com/maps/dir/?api=1&destination=" + encodeURIComponent(p.dir + ", Los Ángeles, Chile") : "");
+    const url = p.osm ? "https://www.google.com/maps/dir/?api=1&destination=" + p.lat + "," + p.lng : (p.dir ? "https://www.google.com/maps/dir/?api=1&destination=" + encodeURIComponent(p.dir + ", " + (p.comuna || "Los Ángeles") + ", Chile") : "");
     card.innerHTML = `${tags}${aprox}<h3>${esc(p.nombre)}</h3>
+      <p><b>Comuna:</b> ${esc(p.comuna)}</p>
       <p><b>Dirección:</b> ${esc(p.dir) || "Por confirmar"}</p>
       <p><b>Qué reciben:</b> ${p.acepta}</p>
       <p><b>Horario:</b> ${esc(p.horario)}</p>
@@ -240,7 +241,7 @@ fetch("data/osm_biobio.json", {cache:"no-store"}).then(r => r.ok ? r.json() : nu
     if (typeof o.lat !== "number" || typeof o.lng !== "number") return;
     if (PUNTOS.some(p => p.lat !== null && cerca(p, o))) return;
     const tipos = (o.tipos || []).filter(t => TIPOS[t] && t !== "campana"); if (!tipos.length) return;
-    PUNTOS.push({osm:true, nombre:o.nombre, tipos, dir:o.dir, lat:o.lat, lng:o.lng,
+    PUNTOS.push({osm:true, comuna:o.comuna || "Biobío (OpenStreetMap)", nombre:o.nombre, tipos, dir:o.dir, lat:o.lat, lng:o.lng,
       acepta:"Según OpenStreetMap: " + tipos.map(t => ACEPTA_OSM[t]).join(", ") + ".",
       horario:o.horario || "No indicado en OpenStreetMap: confirma antes de ir",
       fuente:"OpenStreetMap, consulta automática del " + (d.consultado || "—") + ". Sin confirmar en terreno"});
