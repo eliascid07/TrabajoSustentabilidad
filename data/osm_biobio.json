@@ -1,1 +1,19 @@
-
+{
+ "consultado": "2026-11-18",
+ "fuente": "OpenStreetMap (Overpass API)",
+ "total": 1,
+ "puntos": [
+  {
+   "id": "node/4619403431",
+   "nombre": "Centro de reciclaje",
+   "tipos": [
+    "pilas"
+   ],
+   "dir": "Freire",
+   "lat": -36.7369397,
+   "lng": -72.9934978,
+   "horario": null,
+   "administra": null
+  }
+ ]
+}
