@@ -172,6 +172,7 @@ const PUNTOS = [
    nota:"Campaña finalizada. Próximas fechas por anunciar: seguir las redes de Entel y de la Municipalidad."}
 ];
 const TIPOS = {todos:["Todos","#0B2E33"], celulares:["Celulares y cargadores","#028090"], pilas:["Pilas","#00A896"], raee:["Residuos electrónicos","#5B6C70"], campana:["Campañas itinerantes","#E08A00"]};
+const esc = t => String(t == null ? "" : t).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
 const colorDe = p => (p.tipos[0] === "campana" ? TIPOS.campana[1] : "#9AA8AA"); // gris = sin confirmar en terreno (regla del plan: gris si no se verificó en 90 días)
 
 // ====== MAPA ======
@@ -209,25 +210,44 @@ function pintar() {
     let marcador = null;
     if (capa && p.lat !== null) {
       const icon = L.divIcon({className:"", html:`<div class="pin" style="background:${colorDe(p)}"></div>`, iconSize:[26,26], iconAnchor:[13,26]});
-      marcador = L.marker([p.lat, p.lng], {icon}).addTo(capa).bindPopup("<b>" + p.nombre + "</b><br>" + p.dir);
+      marcador = L.marker([p.lat, p.lng], {icon}).addTo(capa).bindPopup("<b>" + esc(p.nombre) + "</b><br>" + esc(p.dir || ""));
     }
     const card = document.createElement("div"); card.className = "card";
     const tags = p.tipos.map(t => `<span class="tag" style="background:${TIPOS[t][1]}">${TIPOS[t][0]}</span>`).join("");
-    const aprox = (p.tipos[0] !== "campana" ? '<span class="tag" style="background:#9AA8AA">Sin confirmar en terreno</span>' : "") + ((p.lat !== null && p.tipos[0] !== "campana") ? '<span class="tag warn">Ubicación aproximada</span>' : "");
-    const url = p.dir ? "https://www.google.com/maps/dir/?api=1&destination=" + encodeURIComponent(p.dir + ", Los Ángeles, Chile") : "";
-    card.innerHTML = `${tags}${aprox}<h3>${p.nombre}</h3>
-      <p><b>Dirección:</b> ${p.dir || "Por confirmar"}</p>
+    const aprox = (p.osm ? '<span class="tag" style="background:#6B7F83">OpenStreetMap</span>' : "") + (p.tipos[0] !== "campana" ? '<span class="tag" style="background:#9AA8AA">Sin confirmar en terreno</span>' : "") + ((p.lat !== null && p.tipos[0] !== "campana" && !p.osm) ? '<span class="tag warn">Ubicación aproximada</span>' : "");
+    const url = p.osm ? "https://www.google.com/maps/dir/?api=1&destination=" + p.lat + "," + p.lng : (p.dir ? "https://www.google.com/maps/dir/?api=1&destination=" + encodeURIComponent(p.dir + ", Los Ángeles, Chile") : "");
+    card.innerHTML = `${tags}${aprox}<h3>${esc(p.nombre)}</h3>
+      <p><b>Dirección:</b> ${esc(p.dir) || "Por confirmar"}</p>
       <p><b>Qué reciben:</b> ${p.acepta}</p>
-      <p><b>Horario:</b> ${p.horario}</p>
+      <p><b>Horario:</b> ${esc(p.horario)}</p>
       ${p.nota ? `<p class="muted">${p.nota}</p>` : ""}
-      <p class="muted">Fuente: ${p.fuente}</p>
+      <p class="muted">Fuente: ${esc(p.fuente)}</p>
       <a class="btn ${url ? "" : "off"}" ${url ? `href="${url}" target="_blank" rel="noopener"` : ""}>Cómo llegar</a>`;
     card.onclick = e => { if (marcador && e.target.tagName !== "A") { map.setView([p.lat, p.lng], 15); marcador.openPopup(); mapEl.scrollIntoView({behavior:"smooth", block:"center"}); } };
-    const aBtn = card.querySelector("a.btn"); if (aBtn && url) aBtn.addEventListener("click", () => contar("como-llegar-" + p.nombre));
+    const aBtn = card.querySelector("a.btn"); if (aBtn && url) aBtn.addEventListener("click", () => contar("como-llegar-" + (p.osm ? "osm-" : "") + p.nombre));
     lista.appendChild(card);
   });
 }
 pintar();
+
+// ====== PUNTOS DE OPENSTREETMAP (se actualizan solos cada lunes; ver .github/workflows/osm.yml) ======
+const ACEPTA_OSM = {celulares:"celulares", pilas:"pilas", raee:"aparatos electrónicos"};
+fetch("data/osm_biobio.json", {cache:"no-store"}).then(r => r.ok ? r.json() : null).then(d => {
+  if (!d || !Array.isArray(d.puntos) || !d.puntos.length) return;
+  const cerca = (a, b) => Math.abs(a.lat - b.lat) < 0.001 && Math.abs(a.lng - b.lng) < 0.001; // ~100 m: ya está en la lista municipal
+  let n = 0;
+  d.puntos.forEach(o => {
+    if (typeof o.lat !== "number" || typeof o.lng !== "number") return;
+    if (PUNTOS.some(p => p.lat !== null && cerca(p, o))) return;
+    const tipos = (o.tipos || []).filter(t => TIPOS[t] && t !== "campana"); if (!tipos.length) return;
+    PUNTOS.push({osm:true, nombre:o.nombre, tipos, dir:o.dir, lat:o.lat, lng:o.lng,
+      acepta:"Según OpenStreetMap: " + tipos.map(t => ACEPTA_OSM[t]).join(", ") + ".",
+      horario:o.horario || "No indicado en OpenStreetMap: confirma antes de ir",
+      fuente:"OpenStreetMap, consulta automática del " + (d.consultado || "—") + ". Sin confirmar en terreno"});
+    n++;
+  });
+  if (n) { pintar(); contar("osm-cargado"); }
+}).catch(() => {});
 
 // ====== CATEGORÍAS: pesos medidos con balanza el 18-11-2026 (n = aparatos pesados) ======
 const FACTOR = 3.8, PESO = 0.2;
