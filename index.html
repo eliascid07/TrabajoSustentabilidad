@@ -24,6 +24,7 @@ h2{font-size:18px;margin:22px 0 8px}
 .card p{margin:2px 0;font-size:14px}.muted{color:var(--gray);font-size:12.5px}
 .tag{display:inline-block;font-size:12px;border-radius:10px;padding:2px 9px;color:#fff;margin:0 4px 4px 0}
 .warn{background:#FFF4D6;color:#6B4E00}
+.tip{margin:4px 0 10px;padding:8px 12px;background:#E6F5F2;border-left:4px solid var(--sea);border-radius:6px;font-size:14px}
 .btn{display:inline-block;margin-top:8px;background:var(--teal);color:#fff;text-decoration:none;border:0;border-radius:8px;padding:9px 14px;font-size:14px;cursor:pointer}
 .btn.off{background:#B9C6C4;pointer-events:none}
 .pin{width:26px;height:26px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4)}
@@ -51,6 +52,7 @@ footer{max-width:900px;margin:0 auto;padding:10px 14px 30px;font-size:12.5px;col
 <main>
   <section>
     <h2>1. Encuentra un punto</h2>
+    <p class="tip"><b>Cómo usarlo:</b> elige un tipo, mira la lista de abajo y toca “Cómo llegar” para abrir Google Maps.</p>
     <div class="chips" id="chips"></div>
     <div id="map"></div>
     <div id="list"></div>
@@ -224,7 +226,7 @@ function pintar() {
       <p><b>Horario:</b> ${esc(p.horario)}</p>
       ${p.nota ? `<p class="muted">${p.nota}</p>` : ""}
       <p class="muted">Fuente: ${esc(p.fuente)}</p>
-      <a class="btn ${url ? "" : "off"}" ${url ? `href="${url}" target="_blank" rel="noopener"` : ""}>Cómo llegar</a>`;
+      <a class="btn ${url ? "" : "off"}" ${url ? `href="${url}" target="_blank" rel="noopener"` : ""}>Cómo llegar (Google Maps)</a>`;
     card.onclick = e => { if (marcador && e.target.tagName !== "A") { map.setView([p.lat, p.lng], 15); marcador.openPopup(); mapEl.scrollIntoView({behavior:"smooth", block:"center"}); } };
     const aBtn = card.querySelector("a.btn"); if (aBtn && url) aBtn.addEventListener("click", () => contar("como-llegar-" + (p.osm ? "osm-" : "") + p.nombre));
     lista.appendChild(card);
